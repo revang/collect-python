@@ -1,24 +1,40 @@
 import requests
+import random
+import json
 from bs4 import BeautifulSoup
 
+"""
+建立Cookie池
+
+目的: 
+1. 为了避免被封账号
+    在爬虫程序中使用cookie模拟登录是为了爬取那些需要登录才能获取的数据。如果使用同一个账号登录网站频繁爬取数据，有可能被服务器察觉，服务器就会封禁这个账号。
+    对于这种反爬措施，也可以采用和IP反爬措施相同的应对思路：不同账号的cookie值是不同的，使用多个账号登录网站并记录cookie值，将这些cookie值保存在一个cookie池中，在爬取数据时从cookie池中随机选取一个cookie值用于登录，就能降低账号被封禁的概率。
+
+2. cookie值具有时效性
+    在指定时间之后cookie值就过期了，因此，在每一次使用cookie池之前，最好都调用一下get_cookies()函数来获取最新的cookie值。
+
+3. 不同的账号登录网站后，看到的网页内容是不同的
+    例如，有些网站会根据用户的登录状态来显示不同的网页内容，这些内容可能包含了一些敏感信息，如果使用同一个账号登录网站，就会导致这些敏感信息被爬取到，这是不安全的。
+"""
+
+
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36'}
-cookies = {}
-params = {"action": "login", "username": "dujiaoshou", "password": "dujiaoshou801"}  # plyload / form data
+cookies_list = []
+user_list = [{"username": "dujiaoshou", "password": "dujiaoshou801"}, {"username": "dujiaoshou", "password": "dujiaoshou801"}]
 
 
-def login():
-    """
-    登录
+def get_cookies():
+    global cookies_list
+    for user in user_list:
+        params = {"action": "login", "username": user["username"], "password": user["password"]}  # params = {"action": "login", "username": "dujiaoshou", "password": "dujiaoshou801"}  # plyload / form data
+        response = requests.post("https://www.wenku8.net/login.php", headers=headers, params=params)
+        cookies = response.cookies.get_dict()
+        cookies["jieqiUserCharset"] = "big5"  # 不加会乱码
+        cookies_list.append(cookies)
 
-    >>> login()
-
-    原始地址: https://www.wenku8.net/login.php?jumpurl=http%3A%2F%2Fwww.wenku8.net%2Findex.php%3Fcharset%3Dbig5
-    """
-    global cookies
-    response = requests.post("https://www.wenku8.net/login.php", headers=headers, params=params)
-    cookies = response.cookies.get_dict()
-    cookies["jieqiUserCharset"] = "big5"  # 不加会乱码
-    print(cookies)
+    for i, cookies in enumerate(cookies_list, 1):
+        print(i, json.dumps(cookies)[:100]+"...")
 
 
 def get_book_list():
@@ -58,6 +74,7 @@ def get_book_list():
                 auth=(),
                 )
     """
+    cookies = random.choice(cookies_list)  # 随机选择一个账号
     response = requests.get("https://www.wenku8.net/modules/article/bookcase.php", headers=headers, cookies=cookies)
     response.encoding = "big5"
     htm_text = response.text
@@ -81,5 +98,5 @@ def get_book_list():
             print(e)
 
 
-login()
+get_cookies()
 get_book_list()
