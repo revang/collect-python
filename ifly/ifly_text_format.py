@@ -4,11 +4,12 @@
 import sys
 
 
-def ifly_text_format(filepath):
+def ifly_text_format(inpath, outpath="output.txt"):
     """
     讯飞听见导出文本格式化
     """
-    with open(filepath, mode="r", encoding="utf-8") as f:
+    res = []
+    with open(inpath, mode="r", encoding="utf-8") as f:
         lines = f.readlines()
         idx, size = 1, len(lines)
         while idx < size:
@@ -20,8 +21,13 @@ def ifly_text_format(filepath):
                     context += lines[idx]
                     idx += 1
                 begin_time, speaker,  context = begin_time.strip(), speaker.strip(), context.replace("\n", "").strip()
-                print("{} {}: {}".format(begin_time, speaker, context))
-            idx += 1
+                res.append("{} {}：{}\n".format(begin_time, speaker, context))
+                print("{} {}：{}".format(begin_time, speaker, context))
+            else:
+                idx += 1
+
+    with open(outpath, mode="w", encoding="utf-8") as f:
+        f.writelines(res)
 
 
 def main():
