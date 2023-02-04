@@ -6,7 +6,7 @@
 
 import requests
 import json
-import sqlalchemy as db
+import database.sqlalchemy.sqlalchemy as db
 import time
 import random
 import pandas as pd

@@ -2,7 +2,7 @@
 
 import requests
 import json
-from sqlalchemy import create_engine, Column, String, Integer, Float
+from database.sqlalchemy.sqlalchemy import create_engine, Column, String, Integer, Float
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 

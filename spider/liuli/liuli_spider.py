@@ -7,6 +7,10 @@ from bs4 import BeautifulSoup
 from lxml import etree
 
 
+class LiuliArticle:
+    pass
+
+
 class LiuliSpider:
     def __init__(self):
         self.proxies = {"http": "http://localhost:1081", "https": "http://localhost:1081"}
